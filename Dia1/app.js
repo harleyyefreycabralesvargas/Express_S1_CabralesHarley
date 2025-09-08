@@ -55,3 +55,5 @@ app.listen(PORT,()=>{
     console.log("server iniciado");
 }
 );
+
+// requerir mongodb
