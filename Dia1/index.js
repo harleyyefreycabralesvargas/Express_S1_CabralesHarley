@@ -37,6 +37,7 @@ async function crearColecciones() {
     await db.createCollection("salones")
     await db.createCollection("horarios")
     await db.createCollection("rutas")
+    await db.createCollection("coordinador")
 }
 // Funcion para desconectar mongo db
 async function desconectarDb() {
@@ -63,6 +64,23 @@ app.get('/crearColecciones', async (req, res) => {
 //  curl http://localhost:6969/crearColecciones
 // ############################################################################################################################################################################################################################
 // ############################################################################################################################################################################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // Endpoint asincrono para crear campers con su informacion atravez de un metodo post con la informacion del camper en archivo json
 app.post('/crearEstudiante', async (req, res) => {
     async function crearEstudiante() {
@@ -73,6 +91,7 @@ app.post('/crearEstudiante', async (req, res) => {
 
             let infoCrearEst = req.body;
             console.log(infoCrearEst);
+            infoCrearEst.estado="inscrito"
             infoCrearEst.idCamper = (uCamper.at(-1)?.idCamper ?? -1) + 1;
             console.log(infoCrearEst.idCamper);
 
@@ -85,7 +104,7 @@ app.post('/crearEstudiante', async (req, res) => {
     await crearEstudiante()
 })
 ///hola :)
-//  curl -X POST http://localhost:6969/crearEstudiante   -H "Content-Type: application/json"   -d '{"contrasena":"1","nombre":"Juan","apellido":"Pérez","acudiente":"María Gómez","telefono":"3124567890","estado":"activo"}'
+//  curl -X POST http://localhost:6969/crearEstudiante   -H "Content-Type: application/json"   -d '{"contrasena":"1","nombre":"Juan","apellido":"Pérez","acudiente":"María Gómez","telefono":"3124567890"}'
 // ############################################################################################################################################################################################################################
 // ############################################################################################################################################################################################################################
 // endpoint para obtener la informacion de un camper por id, autenticando la contraseña
@@ -116,7 +135,37 @@ app.get('/campers/:idCamper,:contrasena/verMiInfo', async (req, res) => {
     await buscarCamper();
 }
 );
+
 // curl http://localhost:6969/campers/0,1/verMiInfo
+ 
+
+app.get('/campers/:idCamper,:contrasena/academico', async (req, res) => {
+    async function mirarInfoAcademica() {
+        try {
+            let { collection } = await conectar("campers");
+            let id = req.params.idCamper;
+            let contraseña=String(req.params.contrasena)
+            let camper = await collection.findOne({ "idCamper": Number(id) })
+            console.log(camper);
+            if(camper.contrasena==contraseña){
+            res.json({
+                "idCamper":camper.idCamper,
+                "nombre":camper.nombre,
+                "apellido":camper.apellido,
+                "acudiente":camper.acudiente,
+                "telefono":camper.telefono,
+                "estado":camper.estado
+            })
+        }else{
+            res.json("id o contraseña incorrectos")
+        }
+        } catch (e){
+            console.log(e,'error en crear colecciones')
+        }
+    }
+    await mirarInfoAcademica();
+}
+);
 
 
 
@@ -139,6 +188,25 @@ app.get('/campers/:idCamper,:contrasena/verMiInfo', async (req, res) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ############################################################################################################################################################################################################################
+// ############################################################################################################################################################################################################################
 
 
 /////////////TRainers Crear
@@ -166,6 +234,9 @@ app.post('/crearTrainer', async (req, res) => {
 })
 
 //  curl -X POST http://localhost:6969/crearTrainer   -H "Content-Type: application/json"   -d '{"contrasena":"2","nombre":"Pedro","apellido":"Gomez","telefono":"3164372414","idHorario":1,"idGrupos":2}'
+
+// ############################################################################################################################################################################################################################
+// ############################################################################################################################################################################################################################
 
  
 //// Trainer verInfo
@@ -201,6 +272,45 @@ app.get('/trainers/:idTrainer,:contrasena/verMiInfo', async (req, res) => {
 // ############################################################################################################################################################################################################################
 // ############################################################################################################################################################################################################################
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // crear rutas 
 
 app.post('/crearRuta', async (req, res) => {
@@ -229,6 +339,48 @@ app.post('/crearRuta', async (req, res) => {
 //  curl -X POST http://localhost:6969/crearRuta   -H "Content-Type: application/json"   -d '{"nombreRuta":"NetCore","intro":"","python":"","html/css":"","scrum":"","git":"","Javascript":"","introBBD":"","C##":"","postgreSQL":"","NetCore":""}'
 //  curl -X POST http://localhost:6969/crearRuta   -H "Content-Type: application/json"   -d '{"nombreRuta":"Java","intro":"","python":"","html/css":"","scrum":"","git":"","Javascript":"","introBBD":"","mongoDB":"","postgreSQL":"","SpringBoot":""}'
 
+// ############################################################################################################################################################################################################################
+// ############################################################################################################################################################################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // crear Horario 
 
@@ -236,7 +388,7 @@ app.post('/crearHorario', async (req, res) => {
     async function crearHorario() {
         try {
             let { collection } = await conectar("horarios")
-            let uRuta = await collection.find().toArray()
+            let uHorario = await collection.find().toArray()
             console.log(uHorario);
 
             let infoCrearHorario = req.body;
@@ -261,10 +413,89 @@ app.post('/crearHorario', async (req, res) => {
 
 // ############################################################################################################################################################################################################################
 // ############################################################################################################################################################################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// crear  coordinador
+
+app.post('/crearCoordinador', async (req, res) => {
+    async function crearCoordinador() {
+        try {
+            let { collection } = await conectar("coordinador")
+            let uCoordinador = await collection.find().toArray()
+            console.log(uCoordinador);
+
+            let infoCrearCoordinador = req.body;
+            console.log(infoCrearCoordinador);
+            infoCrearCoordinador.idCoordinador = (uCoordinador.at(-1)?.idCoordinador ?? -1) + 1;
+            console.log(infoCrearCoordinador.idCoordinador);
+
+            await collection.insertOne(infoCrearCoordinador)
+            res.send('coordiandor ingresado correctamente')
+        } catch { 
+            res.send("error en insertar cordinador");  
+        }
+    }
+    await crearCoordinador()
+}) 
 // llamar a el servidor para ejecutar los endpoints
 app.listen(PORT, () => {
     console.log("server iniciadoo");
 }
 );
+//  curl -X POST http://localhost:6969/crearCoordinador   -H "Content-Type: application/json"   -d '{"contrasena":"xd","nombre":"juan","apellido":"perez"}'
+
+
+app.get('/coordinador/:idCoordinador,:contrasena/verMiInfo', async (req, res) => {
+    async function buscarCoordinador() {
+        try {
+            let { collection } = await conectar("coordinador");
+            let id = req.params.idCoordinador;
+            let contraseña=String(req.params.contrasena)
+            let coordinador = await collection.findOne({ "idCoordinador": Number(id) })
+            console.log(coordinador);
+            if(coordinador.contrasena==contraseña){
+            res.json({
+                "idCoordinador":coordinador.idCoordinador,
+                "nombre":coordinador.nombre,
+                "apellido":coordinador.apellido
+                })
+        }else{
+            res.json("id o contraseña incorrectos")
+        }
+        } catch (e){
+            console.log(e,'error al iniciar sesion')
+        }
+    }
+    await buscarCoordinador();
+}
+);
+
+
+// curl http://localhost:6969/coordinador/0,xd/verMiInfo
+
 // ############################################################################################################################################################################################################################
-// ############################################################################################################################################################################################################################
+// ############################################################################################################################################################################################################################ 
