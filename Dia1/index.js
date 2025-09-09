@@ -273,9 +273,12 @@ app.post('/coordinador/:idCoordinador,:contrasena/crearRuta', async (req, res) =
 
 // crear salones
 
-app.post('/coordinador/:idCoordinador,:contrasena/crearGrupos', async (req, res) => {
+app.post('/coordinador/:idCoordinador/:contrasena/crearGrupos', async (req, res) => {
     async function crearGrupo() {
         try {
+            let { collection } = await conectar("coordinador");
+            let id = req.params.idCoordinador;
+            console.log(id);
             let contraseña = String(req.params.contrasena)
             console.log(contraseña);
             let coordinador = await collection.findOne({ "idCoordinador": Number(id) })
@@ -296,11 +299,6 @@ app.post('/coordinador/:idCoordinador,:contrasena/crearGrupos', async (req, res)
             } else {
                 res.json("id o contraseña incorrectos")
             }
-            let { collection } = await conectar("coordinador");
-            let id = req.params.idCoordinador;
-            console.log(id);
-
-
         } catch {
             res.send("error en insertar grupo");
         }
@@ -309,7 +307,7 @@ app.post('/coordinador/:idCoordinador,:contrasena/crearGrupos', async (req, res)
 })
 
 
-//  curl -X POST http://localhost:6969/coordinador/0,xd/crearGrupos   -H "Content-Type: application/json"   -d '{"nombreGrupo":"S1","campers":[1,2,3,4,5,6,7,8],"idHorario":1,"idTrainer":1,"idRuta":1}'
+//  curl -X POST http://localhost:6969/coordinador/0/xd/crearGrupos   -H "Content-Type: application/json"   -d '{"nombreGrupo":"S1"}'
 
 
 // ############################################################################################################################################################################################################################
@@ -348,7 +346,7 @@ app.get('/coordinador/:idCoordinador/:contrasena/aprobarCamper', async (req, res
 // ############################################################################################################################################################################################################################
 
 
-app.get('/coordinador/:idCoordinador/:contrasena/aprobarCamper/:idCamper', async (req, res) => {
+app.put('/coordinador/:idCoordinador/:contrasena/aprobarCamper/:idCamper', async (req, res) => {
     async function crearGrupo() {
         try {
             let { collection } = await conectar("coordinador");
@@ -379,73 +377,171 @@ app.get('/coordinador/:idCoordinador/:contrasena/aprobarCamper/:idCamper', async
     await crearGrupo()
 })
 
-// curl http://localhost:6969/coordinador/0/xd/aprobarCamper/1
+// curl -X PUT "http://localhost:6969/coordinador/0/xd/aprobarCamper/1"
 
 // ############################################################################################################################################################################################################################
 // ############################################################################################################################################################################################################################
 
-app.get('/coordinador/:idCoordinador/:contrasena/asignarCamperGrupo', async (req, res) => {
-    async function buscarCamper() {
 
-        try {
-            let { collection } = await conectar("coordinador");
-            let id = req.params.idCoordinador;
-            console.log(id);
-            let contraseña = String(req.params.contrasena)
-            console.log(contraseña);
-            let coordinador = await collection.findOne({ "idCoordinador": Number(id) })
-            if (coordinador.contrasena == contraseña) {
-                let { collection } = await conectar("campers");
-                let camper = await collection.find({ estado: "Aprobado" }).toArray();
-                res.json(camper)
-            } else {
-                res.json("id o contraseña incorrectos")
-            }
-        } catch {
-            res.send("error en aprobar camper");
-        }
-    }
-
-
-    await buscarCamper();
-});
-
-//curl http://localhost:6969/coordinador/0/xd/asignarCamperGrupo
-
-
-// ############################################################################################################################################################################################################################
-// ############################################################################################################################################################################################################################
-
-app.get('/coordinador/:idCoordinador/:contrasena/asignarCamperGrupo', async (req, res) => {
+app.put('/coordinador/:idCoordinador/:contrasena/asignarGrupoRuta/:idGrupo/:idRuta', async (req, res) => {
     async function crearGrupo() {
         try {
+            const { idGrupo, idRuta } = req.params;
+
             let { collection } = await conectar("coordinador");
             let id = req.params.idCoordinador;
             console.log(id);
-            const identificador = req.params.idCamper
             let contraseña = String(req.params.contrasena)
             console.log(contraseña);
             let coordinador = await collection.findOne({ "idCoordinador": Number(id) })
-            console.log(coordinador);
-            console.log(coordinador);
             if (coordinador.contrasena == contraseña) {
-                let { collection } = await conectar("campers")
+                let { collection: gruposCollection } = await conectar("grupos");
+                let { collection: rutasCollection } = await conectar("rutas");
                 console.log(await collection.findOne())
-                console.log(Number(identificador));
-                await collection.updateOne(
-                    { "idCamper": Number(identificador) },
-                    { $set: { "estado": "Aprobado" } }
+
+                await gruposCollection.updateOne(
+                    { "idGrupo": Number(idGrupo) },
+                    { $set: { "idRuta": Number(idRuta) } }
                 )
-                res.json(`Camper ${identificador} aprobado`)
+                res.json(`ruta ${idRuta} asignada`)
             } else {
                 res.json("id o contraseña incorrectos")
             }
         } catch {
-            res.send("error en aprobar camper");
+            res.send("ruta asignada");
         }
     }
     await crearGrupo()
 })
+
+// curl -X PUT http://localhost:6969/coordinador/0/xd/asignarGrupoRuta/2/1
+
+
+// ############################################################################################################################################################################################################################
+// ############################################################################################################################################################################################################################
+
+// ############################################################################################################################################################################################################################
+// ############################################################################################################################################################################################################################
+
+
+app.put('/coordinador/:idCoordinador/:contrasena/asignarGrupoHorario/:idGrupo/:idHorario', async (req, res) => {
+    async function crearGrupo() {
+        try {
+            const { idGrupo, idHorario } = req.params;
+
+            let { collection } = await conectar("coordinador");
+            let id = req.params.idCoordinador;
+            console.log(id);
+            let contraseña = String(req.params.contrasena)
+            console.log(contraseña);
+            let coordinador = await collection.findOne({ "idCoordinador": Number(id) })
+            if (coordinador.contrasena == contraseña) {
+                let { collection: gruposCollection } = await conectar("grupos");
+                let { collection: horariosCollection } = await conectar("horarios");
+                console.log(await collection.findOne())
+
+                await gruposCollection.updateOne(
+                    { "idGrupo": Number(idGrupo) },
+                    { $set: { "idHorario": Number(idHorario) } }
+                )
+                res.json(`horario ${idHorario} asignada`)
+            } else {
+                res.json("id o contraseña incorrectos")
+            }
+        } catch {
+            res.send("horario no asignada");
+        }
+    }
+    await crearGrupo()
+})
+
+// curl -X PUT http://localhost:6969/coordinador/0/xd/asignarGrupoHorario/3/3
+
+
+// ############################################################################################################################################################################################################################
+// ############################################################################################################################################################################################################################
+// ############################################################################################################################################################################################################################
+// ############################################################################################################################################################################################################################
+
+
+app.put('/coordinador/:idCoordinador/:contrasena/asignarGrupoTrainer/:idGrupo/:idTrainer', async (req, res) => {
+    async function crearGrupo() {
+        try {
+            const { idGrupo, idTrainer } = req.params;
+
+            let { collection } = await conectar("coordinador");
+            let id = req.params.idCoordinador;
+            console.log(id);
+            let contraseña = String(req.params.contrasena)
+            console.log(contraseña);
+            let coordinador = await collection.findOne({ "idCoordinador": Number(id) })
+            if (coordinador.contrasena == contraseña) {
+                let { collection: gruposCollection } = await conectar("grupos");
+                let { collection: trainerCollection } = await conectar("trainers");
+                console.log(await collection.findOne())
+
+                await gruposCollection.updateOne(
+                    { "idGrupo": Number(idGrupo) },
+                    { $set: { "idTrainer": Number(idTrainer) } }
+                )
+                res.json(`trainer ${idTrainer} asignada`)
+            } else {
+                res.json("id o contraseña incorrectos")
+            }
+        } catch {
+            res.send("trainer no asignada");
+        }
+    }
+    await crearGrupo()
+})
+
+// curl -X PUT http://localhost:6969/coordinador/0/xd/asignarGrupoTrainer/3/5
+
+
+// ############################################################################################################################################################################################################################
+// ############################################################################################################################################################################################################################
+
+
+
+// ############################################################################################################################################################################################################################
+// ############################################################################################################################################################################################################################
+
+
+app.put('/coordinador/:idCoordinador/:contrasena/asignarGrupoCamper/:idGrupo/:idCamper', async (req, res) => {
+    async function crearGrupo() {
+        try {
+            const { idGrupo, idCamper } = req.params;
+            let { collection } = await conectar("coordinador");
+            let id = req.params.idCoordinador;
+            console.log(id);
+            let contraseña = String(req.params.contrasena)
+            console.log(contraseña);
+            let coordinador = await collection.findOne({ "idCoordinador": Number(id) })
+            if (coordinador.contrasena == contraseña) {
+                let { collection: gruposCollection } = await conectar("grupos");
+                let { collection: campersCollection } = await conectar("campers");
+                console.log(await collection.findOne())
+                await gruposCollection.updateOne(
+                    { "idGrupo": Number(idGrupo) },
+                    { $addToSet: { "campers": Number(idCamper) } }
+                )
+                await campersCollection.updateOne(
+                    { "idCamper": Number(idCamper) },
+                    { $addToSet: { "campers": Number(idCamper) } }
+                )
+    
+                res.json(`camper ${idCamper} asignado`)
+            } else {
+                res.json("id o contraseña incorrectos")
+            }
+        } catch {
+            res.send("no se pudo asignar el camper ");
+        }
+    }
+    await crearGrupo()
+})
+
+// curl -X PUT http://localhost:6969/coordinador/0/xd/asignarGrupoCamper/1/1
 
 
 
@@ -507,8 +603,11 @@ app.get('/campers/:idCamper,:contrasena/verMiInfo', async (req, res) => {
         }
     }
     await buscarCamper();
+
 }
 );
+
+
 
 // curl http://localhost:6969/campers/0,1/verMiInfo
 
@@ -539,6 +638,7 @@ app.get('/campers/:idCamper,:contrasena/academico', async (req, res) => {
     await mirarInfoAcademica();
 }
 );
+///juan 
 
 
 
