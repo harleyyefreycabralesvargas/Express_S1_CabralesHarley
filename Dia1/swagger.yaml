@@ -1,0 +1,247 @@
+openapi: 3.0.0
+info:
+  title: API Campus Management
+  version: 1.0.0
+  description: >
+    API para gestionar coordinadores, campers, trainers, rutas, horarios y grupos en el sistema Campus.
+servers:
+  - url: http://localhost:6969
+paths:
+  /crearColecciones:
+    get:
+      summary: Crear colecciones en MongoDB
+      responses:
+        "200":
+          $ref: '#/components/responses/Success'
+  /crearCoordinador:
+    post:
+      summary: Crear un nuevo coordinador
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CoordinadorInput'
+      responses:
+        "200":
+          $ref: '#/components/responses/Created'
+  /coordinador/{idCoordinador},{contrasena}/crearEstudiante:
+    post:
+      summary: Crear un nuevo camper (por coordinador autenticado)
+      parameters:
+        - $ref: '#/components/parameters/idCoordinador'
+        - $ref: '#/components/parameters/contrasena'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CamperInput'
+      responses:
+        "200":
+          $ref: '#/components/responses/Created'
+  /coordinador/{idCoordinador},{contrasena}/crearTrainer:
+    post:
+      summary: Crear un nuevo trainer
+      parameters:
+        - $ref: '#/components/parameters/idCoordinador'
+        - $ref: '#/components/parameters/contrasena'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrainerInput'
+      responses:
+        "200":
+          $ref: '#/components/responses/Created'
+  /coordinador/{idCoordinador},{contrasena}/crearHorario:
+    post:
+      summary: Crear un nuevo horario
+      parameters:
+        - $ref: '#/components/parameters/idCoordinador'
+        - $ref: '#/components/parameters/contrasena'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HorarioInput'
+      responses:
+        "200":
+          $ref: '#/components/responses/Created'
+  /coordinador/{idCoordinador},{contrasena}/crearRuta:
+    post:
+      summary: Crear una nueva ruta
+      parameters:
+        - $ref: '#/components/parameters/idCoordinador'
+        - $ref: '#/components/parameters/contrasena'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RutaInput'
+      responses:
+        "200":
+          $ref: '#/components/responses/Created'
+  /coordinador/{idCoordinador}/{contrasena}/crearGrupos:
+    post:
+      summary: Crear un nuevo grupo
+      parameters:
+        - $ref: '#/components/parameters/idCoordinador'
+        - $ref: '#/components/parameters/contrasena'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GrupoInput'
+      responses:
+        "200":
+          $ref: '#/components/responses/Created'
+  /coordinador/{idCoordinador}/{contrasena}/aprobarCamper:
+    get:
+      summary: Listar campers inscritos pendientes de aprobación
+      parameters:
+        - $ref: '#/components/parameters/idCoordinador'
+        - $ref: '#/components/parameters/contrasena'
+      responses:
+        "200":
+          $ref: '#/components/responses/Success'
+  /coordinador/{idCoordinador}/{contrasena}/aprobarCamper/{idCamper}:
+    put:
+      summary: Aprobar camper por ID
+      parameters:
+        - $ref: '#/components/parameters/idCoordinador'
+        - $ref: '#/components/parameters/contrasena'
+        - $ref: '#/components/parameters/idCamper'
+      responses:
+        "200":
+          $ref: '#/components/responses/Updated'
+  /campers/{idCamper},{contrasena}/verMiInfo:
+    get:
+      summary: Ver información personal de un camper
+      parameters:
+        - $ref: '#/components/parameters/idCamper'
+        - $ref: '#/components/parameters/contrasena'
+      responses:
+        "200":
+          $ref: '#/components/responses/Success'
+  /trainers/{idTrainer},{contrasena}/verMiInfo:
+    get:
+      summary: Ver información personal de un trainer
+      parameters:
+        - $ref: '#/components/parameters/idTrainer'
+        - $ref: '#/components/parameters/contrasena'
+      responses:
+        "200":
+          $ref: '#/components/responses/Success'
+  /coordinador/{idCoordinador},{contrasena}/verMiInfo:
+    get:
+      summary: Ver información personal del coordinador
+      parameters:
+        - $ref: '#/components/parameters/idCoordinador'
+        - $ref: '#/components/parameters/contrasena'
+      responses:
+        "200":
+          $ref: '#/components/responses/Success'
+
+components:
+  responses:
+    Success:
+      description: Operación exitosa
+    Created:
+      description: Recurso creado correctamente
+    Updated:
+      description: Recurso actualizado correctamente
+    Unauthorized:
+      description: ID o contraseña incorrectos
+    Error:
+      description: Error en la operación
+  parameters:
+    idCoordinador:
+      in: path
+      name: idCoordinador
+      schema:
+        type: integer
+      required: true
+      description: ID del coordinador
+    idTrainer:
+      in: path
+      name: idTrainer
+      schema:
+        type: integer
+      required: true
+      description: ID del trainer
+    idCamper:
+      in: path
+      name: idCamper
+      schema:
+        type: integer
+      required: true
+      description: ID del camper
+    contrasena:
+      in: path
+      name: contrasena
+      schema:
+        type: string
+      required: true
+      description: Contraseña de autenticación
+  schemas:
+    CoordinadorInput:
+      type: object
+      properties:
+        contrasena:
+          type: string
+        nombre:
+          type: string
+        apellido:
+          type: string
+    CamperInput:
+      type: object
+      properties:
+        contrasena:
+          type: string
+        nombre:
+          type: string
+        apellido:
+          type: string
+        acudiente:
+          type: string
+        telefono:
+          type: string
+    TrainerInput:
+      type: object
+      properties:
+        contrasena:
+          type: string
+        nombre:
+          type: string
+        apellido:
+          type: string
+        telefono:
+          type: string
+        idHorario:
+          type: integer
+        idGrupos:
+          type: integer
+    HorarioInput:
+      type: object
+      properties:
+        nombre:
+          type: string
+        horas:
+          type: string
+    RutaInput:
+      type: object
+      properties:
+        nombreRuta:
+          type: string
+        descripcion:
+          type: string
+    GrupoInput:
+      type: object
+      properties:
+        nombreGrupo:
+          type: string
