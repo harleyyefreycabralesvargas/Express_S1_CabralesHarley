@@ -13,7 +13,7 @@ const client = new MongoClient(uri);
 // Funcion para la conexion de la base de datos
 async function conectar(coleccion) {
     try {
-
+  
         // Función connect y verficación 
         await client.connect();
         console.log("Conectado a MongoDB correctamente");
@@ -28,74 +28,9 @@ async function conectar(coleccion) {
 // Funcion para crear las colecciones en mongo
 async function crearColecciones() {
     let { db } = await conectar("")
-    await db.createCollection("campers", {
-        validator: {
-            $jsonSchema: {
-                bsonType: "object",
-                required: ["contrasena", "nombre", "apellido", "acudiente", "telefono"],
-                additionalProperties: false,
-                properties: {
-                    contrasena: {
-                        bsonType: "string",
-                        minLength: 4,
-                        description: "Contraseña requerida, mínimo 4 caracteres"
-                    },
-                    nombre: {
-                        bsonType: "string",
-                        minLength: 1,
-                        description: "Nombre como string "
-                    },
-                    apellido: {
-                        bsonType: "string",
-                        minLength: 1,
-                        description: "Apellido como string "
-                    },
-                    acudiente: {
-                        bsonType: "string",
-                        minLength: 1,
-                        description: "Nombre del acudiente "
-                    },
-                    telefono: {
-                        bsonType: "string",
-                        pattern: "^[0-9]{7,15}$",
-                        description: "Teléfono solo dígitos, longitud entre 7 y 15"
-                    }
-                }
-            }
-        },
-        validationLevel: "strict",
-        validationAction: "error"
-    });
+    await db.createCollection("campers")
     await db.createCollection("trainers")
-    await db.createCollection("coordinador", {
-        validator: {
-            $jsonSchema: {
-                bsonType: "object",
-                required: ["idCoordinador", "nombre", "apellido", "contrasena"],
-                properties: {
-                    idCoordinador: {
-                        bsonType: "int",
-                        description: "Debe ser un número entero y es obligatorio"
-                    },
-                    nombre: {
-                        bsonType: "string",
-                        description: "Debe ser un string y es obligatorio"
-                    },
-                    apellido: {
-                        bsonType: "string",
-                        description: "Debe ser un string y es obligatorio"
-                    },
-                    contrasena: {
-                        bsonType: "string",
-                        minLength: 4,
-                        description: "Debe ser un string de al menos 4 caracteres"
-                    }
-                }
-            }
-        },
-        validationLevel: "strict",
-        validationAction: "error"
-    });
+    await db.createCollection("coordinador")
     await db.createCollection("salones")
     await db.createCollection("horarios")
     await db.createCollection("rutas")
@@ -158,7 +93,6 @@ app.post('/coordinador/:idCoordinador/:contrasena/crearEstudiante', async (req, 
             console.log(contraseña);
             let coordinador = await collection.findOne({ "idCoordinador": Number(id) })
             console.log(coordinador);
-            console.log(coordinador);
             if (coordinador.contrasena == contraseña) {
                 let { collection } = await conectar("campers")
                 let uCamper = await collection.find().toArray()
@@ -171,20 +105,24 @@ app.post('/coordinador/:idCoordinador/:contrasena/crearEstudiante', async (req, 
                 await collection.insertOne(infoCrearEst)
                 res.status(201).send('camper ingresado correctamente')
             } else {
-                res.json("id o contraseña incorrectos")
+                res.status(401).json("id o contraseña incorrectos")
             }
-        } catch {
-            res.status(400).send("error en insertar camper, campos no validos");
-            res.status(500).send('error en el servidor al crear camper')
+        }catch (err) {
+            console.error(err);
+            if (err.message.includes("validation")) {
+                res.status(400).send("Campos inválidos");
+            } else {
+                res.status(500).send("Error del servidor");
+            }
         }
     }
     await crearEstudiante()
 })
 //  curl -X POST http://localhost:2512/coordinador/0/1234/crearEstudiante   -H "Content-Type: application/json"   -d '{"contrasena":"1234","nombre":"Juan","apellido":"Pérez","acudiente":"María Gómez","telefono":"3124567890"}'
-
+ 
 //TRainers Crear
 
-app.post('/coordinador/:idCoordinador,:contrasena/crearTrainer', async (req, res) => {
+app.post('/coordinador/:idCoordinador/:contrasena/crearTrainer', async (req, res) => {
     async function crearTrainer() {
         try {
             let { collection } = await conectar("coordinador");
@@ -193,8 +131,7 @@ app.post('/coordinador/:idCoordinador,:contrasena/crearTrainer', async (req, res
             let contraseña = String(req.params.contrasena)
             console.log(contraseña);
             let coordinador = await collection.findOne({ "idCoordinador": Number(id) })
-            console.log(coordinador);
-            console.log(coordinador);
+            console.log(await coordinador);
             if (coordinador.contrasena == contraseña) {
                 let { collection } = await conectar("trainers")
                 let uTrainer = await collection.find().toArray()
@@ -208,10 +145,13 @@ app.post('/coordinador/:idCoordinador,:contrasena/crearTrainer', async (req, res
             } else {
                 res.json("id o contraseña incorrectos")
             }
-        } catch {
-            res.status(400).send("error en insertar trainer, campos no validos");
-            res.status(500).send('error en el servidor al crear trainer')
-        }
+        } catch (err){
+            console.error(err);
+            if (err.message.includes("validation")) {
+                res.status(400).send("Campos inválidos");
+            } else {
+                res.status(500).send("Error del servidor");
+            }}
     }
     await crearTrainer()
 })
@@ -244,10 +184,13 @@ app.post('/coordinador/:idCoordinador,:contrasena/crearHorario', async (req, res
             } else {
                 res.json("id o contraseña incorrectos")
             }
-        } catch {
-            res.status(400).send("error en insertar horario, campos no validos");
-            res.status(500).send('error en el servidor al crear horario')
-        }
+        } catch (err){
+            console.error(err);
+            if (err.message.includes("validation")) {
+                res.status(400).send("Campos inválidos");
+            } else {
+                res.status(500).send("Error del servidor");
+            }}
     }
     await crearHorario()
 })
@@ -288,10 +231,13 @@ app.post('/coordinador/:idCoordinador,:contrasena/crearRuta', async (req, res) =
             } else {
                 res.json("id o contraseña incorrectos")
             }
-        } catch {
-            res.status(400).send("error en insertar ruta, campos no validos");
-            res.status(500).send('error en el servidor al crear ruta')
-        }
+        } catch (err) {
+            console.error(err);
+            if (err.message.includes("validation")) {
+                res.status(400).send("Campos inválidos");
+            } else {
+                res.status(500).send("Error del servidor");
+            }}
     }
     await crearRuta()
 })
@@ -329,10 +275,13 @@ app.post('/coordinador/:idCoordinador/:contrasena/crearGrupos', async (req, res)
             } else {
                 res.json("id o contraseña incorrectos")
             }
-        } catch {
-            res.status(400).send("error en insertar grupo, campos no validos");
-            res.status(500).send('error en el servidor al crear grupo')
-        }
+        } catch (err){
+            console.error(err);
+            if (err.message.includes("validation")) {
+                res.status(400).send("Campos inválidos");
+            } else {
+                res.status(500).send("Error del servidor");
+            }}
     }
     await crearGrupo()
 })
@@ -375,7 +324,7 @@ app.put('/coordinador/:idCoordinador/:contrasena/aprobarCamper/:idCamper', async
             let { collection } = await conectar("coordinador");
             let id = req.params.idCoordinador;
             console.log(id);
-            const identificador = req.params.idCamper
+            let identificador = req.params.idCamper
             let contraseña = String(req.params.contrasena)
             console.log(contraseña);
             let coordinador = await collection.findOne({ "idCoordinador": Number(id) })
@@ -398,7 +347,7 @@ app.put('/coordinador/:idCoordinador/:contrasena/aprobarCamper/:idCamper', async
         }
     }
     await crearGrupo()
-})
+}) 
 
 // curl -X PUT "http://localhost:2512/coordinador/0/1234/aprobarCamper/1"
 

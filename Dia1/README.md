@@ -21,7 +21,7 @@ nano .env
 # PORT=2512
 # MONGO_URI=mongodb://localhost:27017
 # DB_NAME=express
-npm run inicio
+npm run inicio 
 ```
 esto descargara los paquetes que se utilizan en el programa y ejecutara nuestro servidor local
 
@@ -47,31 +47,32 @@ http://localhost:2512/doc
 
 crea un coordinador
 
-# Campers
+# 3. Campers
 ### curl -X POST http://localhost:2512/coordinador/0/1234/crearEstudiante   -H "Content-Type: application/json"   -d '{"contrasena":"1234","nombre":"Juan","apellido":"Pérez","acudiente":"María Gómez","telefono":"3124567890"}'
 
+## crea un camper 
 
-Crea un camper 
+### http://localhost:2512/coordinador/0/1234/aprobarCamper
 
-GET /coordinador/:idCoordinador/:contrasena/aprobarCamper
-Lista campers en estado Inscrito
+## lista campers en estado Inscrito
 
-PUT /coordinador/:idCoordinador/:contrasena/aprobarCamper/:idCamper
-Aprueba un camper 
+### curl -X PUT "http://localhost:2512/coordinador/0/1234/aprobarCamper/1"
 
-GET /campers/:idCamper/:contrasena/verMiInfo
-Ver información personal del camper
+## aprueba un camper 
 
-Trainers
+### http://localhost:2512/campers/0/1234/verMiInfo
+## ver información personal del camper
+
+# 4. Trainers
 POST /coordinador/:idCoordinador/:contrasena/crearTrainer
-Crear un trainer
+## crear un trainer
 
 GET /trainers/:idTrainer/:contrasena/verMiInfo
 Ver información personal del trainer
 
 Horarios
 POST /coordinador/:idCoordinador/:contrasena/crearHorario
-Crear un horario
+Crear un horario 
 
 Rutas
 POST /coordinador/:idCoordinador/:contrasena/crearRuta
