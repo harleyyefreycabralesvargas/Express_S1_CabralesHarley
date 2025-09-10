@@ -1,0 +1,568 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Api de campus",
+    "description": "Esta api sirve para manejar el sistema de informacion de campus atraves de endpoints",
+    "version": "1.0.0"
+  },
+  "host": "localhost:2512",
+  "basePath": "/",
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+    "/crearColecciones": {
+      "get": {
+        "description": "",
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/crearCoordinador": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "idCoordinador": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/coordinador/{idCoordinador}/{contrasena}/crearEstudiante": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "idCoordinador",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "contrasena",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "estado": {
+                  "example": "any"
+                },
+                "idCamper": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/coordinador/{idCoordinador,:contrasena}/crearTrainer": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "idCoordinador,:contrasena",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "idTrainer": {
+                  "example": "any"
+                },
+                "idTrainers": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/coordinador/{idCoordinador,:contrasena}/crearHorario": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "idCoordinador,:contrasena",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "idHorario": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/coordinador/{idCoordinador,:contrasena}/crearRuta": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "idCoordinador,:contrasena",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "idRuta": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/coordinador/{idCoordinador}/{contrasena}/crearGrupos": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "idCoordinador",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "contrasena",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "idGrupo": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/coordinador/{idCoordinador}/{contrasena}/aprobarCamper": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "idCoordinador",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "contrasena",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/coordinador/{idCoordinador}/{contrasena}/aprobarCamper/{idCamper}": {
+      "put": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "idCoordinador",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "contrasena",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "idCamper",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/coordinador/{idCoordinador}/{contrasena}/asignarGrupoRuta/{idGrupo}/{idRuta}": {
+      "put": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "idCoordinador",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "contrasena",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "idGrupo",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "idRuta",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/coordinador/{idCoordinador}/{contrasena}/asignarGrupoHorario/{idGrupo}/{idHorario}": {
+      "put": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "idCoordinador",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "contrasena",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "idGrupo",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "idHorario",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/coordinador/{idCoordinador}/{contrasena}/asignarGrupoTrainer/{idGrupo}/{idTrainer}": {
+      "put": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "idCoordinador",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "contrasena",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "idGrupo",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "idTrainer",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/coordinador/{idCoordinador}/{contrasena}/asignarGrupoCamper/{idGrupo}/{idCamper}": {
+      "put": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "idCoordinador",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "contrasena",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "idGrupo",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "idCamper",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/campers/{idCamper}/{contrasena}/verMiInfo": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "idCamper",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "contrasena",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/trainers/{idTrainer}/{contrasena}/verMiInfo": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "idTrainer",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "contrasena",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    }
+  }
+}

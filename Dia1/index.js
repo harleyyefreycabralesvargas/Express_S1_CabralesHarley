@@ -1,16 +1,11 @@
 import express from "express" // Importar express
 const app = express(); // Definir app para usar express
 app.use(express.json());// Volver las respuestas de express en formato json
+import swaggerUI from 'swagger-ui-express'
+import swaggerDocumentation from './swagger.json'  with { type: 'json' };
+app.use('/doc',swaggerUI.serve,swaggerUI.setup(swaggerDocumentation))
 import dotenv from 'dotenv';// Importar dotenv
 dotenv.config();// Cargar las variables de entorno del archivo .env
-import swaggerUi from "swagger-ui-express";
-import YAML from "./s";
-// 🔹 Cargar archivo swagger.yaml
-const ducumentacionSwagger = YAML.load("./swagger.yaml");
-
-// 🔹 Ruta de documentación
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(ducumentacionSwagger));
-
 import { MongoClient } from "mongodb"// Requerir mongodb
 // Llamar variables entorno
 const uri = process.env.MONGO_URI;
@@ -33,39 +28,99 @@ async function conectar(coleccion) {
 // Funcion para crear las colecciones en mongo
 async function crearColecciones() {
     let { db } = await conectar("")
-    await db.createCollection("campers")
+    await db.createCollection("campers", {
+        validator: {
+            $jsonSchema: {
+                bsonType: "object",
+                required: ["contrasena", "nombre", "apellido", "acudiente", "telefono"],
+                additionalProperties: false,
+                properties: {
+                    contrasena: {
+                        bsonType: "string",
+                        minLength: 4,
+                        description: "Contraseña requerida, mínimo 4 caracteres"
+                    },
+                    nombre: {
+                        bsonType: "string",
+                        minLength: 1,
+                        description: "Nombre como string "
+                    },
+                    apellido: {
+                        bsonType: "string",
+                        minLength: 1,
+                        description: "Apellido como string "
+                    },
+                    acudiente: {
+                        bsonType: "string",
+                        minLength: 1,
+                        description: "Nombre del acudiente "
+                    },
+                    telefono: {
+                        bsonType: "string",
+                        pattern: "^[0-9]{7,15}$",
+                        description: "Teléfono solo dígitos, longitud entre 7 y 15"
+                    }
+                }
+            }
+        },
+        validationLevel: "strict",
+        validationAction: "error"
+    });
     await db.createCollection("trainers")
-    await db.createCollection("coordinador")
+    await db.createCollection("coordinador", {
+        validator: {
+            $jsonSchema: {
+                bsonType: "object",
+                required: ["idCoordinador", "nombre", "apellido", "contrasena"],
+                properties: {
+                    idCoordinador: {
+                        bsonType: "int",
+                        description: "Debe ser un número entero y es obligatorio"
+                    },
+                    nombre: {
+                        bsonType: "string",
+                        description: "Debe ser un string y es obligatorio"
+                    },
+                    apellido: {
+                        bsonType: "string",
+                        description: "Debe ser un string y es obligatorio"
+                    },
+                    contrasena: {
+                        bsonType: "string",
+                        minLength: 4,
+                        description: "Debe ser un string de al menos 4 caracteres"
+                    }
+                }
+            }
+        },
+        validationLevel: "strict",
+        validationAction: "error"
+    });
     await db.createCollection("salones")
     await db.createCollection("horarios")
     await db.createCollection("rutas")
-    await db.createCollection("coordinador")
-
     await db.createCollection("grupos")
 }
 // Funcion para desconectar mongo db
 async function desconectarDb() {
     await client.close()
 }
-// ############################################################################################################################################################################################################################
-// ############################################################################################################################################################################################################################
 const PORT = process.env.PORT;// Definimos e puerto del servidor local
-// ############################################################################################################################################################################################################################
-// ############################################################################################################################################################################################################################
 // Endpoint asincrono para crear la base de datos de campus
 app.get('/crearColecciones', async (req, res) => {
     async function CrearColeccion() {
         try {
             await crearColecciones();
-            res.send('colecciones creadas con exito')
+            res.status(201).send('colecciones creadas con exito');
         } catch {
-            res.send('error en crear colecciones')
+            res.status(409).send('las colecciones ya existen');
+            res.status(500).send('error en en servidor al crear colecciones')
         }
     }
     await CrearColeccion();
 }
 );
-//  curl http://localhost:6969/crearColecciones
+//  curl http://localhost:2512/crearColecciones
 
 // crear  coordinador
 
@@ -82,58 +137,52 @@ app.post('/crearCoordinador', async (req, res) => {
             console.log(infoCrearCoordinador.idCoordinador);
 
             await collection.insertOne(infoCrearCoordinador)
-            res.send('coordiandor ingresado correctamente')
+            res.status(201).send('coordiandor ingresado correctamente')
         } catch {
-            res.send("error en insertar cordinador");
+            res.status(400).send("error en insertar cordinador, campos no validos");
+            res.status(500).send('error en el servidor al crear coordinador')
         }
     }
     await crearCoordinador()
 })
-// ############################################################################################################################################################################################################################
-// ############################################################################################################################################################################################################################
+//  curl -X POST http://localhost:2512/crearCoordinador   -H "Content-Type: application/json"   -d '{"contrasena":"1234","nombre":"Juan","apellido":"Pérez"}'
 
 // Endpoint asincrono para crear campers con su informacion atravez de un metodo post con la informacion del camper en archivo json
-app.post('/coordinador/:idCoordinador,:contrasena/crearEstudiante', async (req, res) => {
+app.post('/coordinador/:idCoordinador/:contrasena/crearEstudiante', async (req, res) => {
     async function crearEstudiante() {
         try {
             let { collection } = await conectar("coordinador");
             let id = req.params.idCoordinador;
             console.log(id);
-
             let contraseña = String(req.params.contrasena)
             console.log(contraseña);
-
             let coordinador = await collection.findOne({ "idCoordinador": Number(id) })
             console.log(coordinador);
-
             console.log(coordinador);
             if (coordinador.contrasena == contraseña) {
                 let { collection } = await conectar("campers")
                 let uCamper = await collection.find().toArray()
                 console.log(uCamper);
-
                 let infoCrearEst = req.body;
                 console.log(infoCrearEst);
                 infoCrearEst.estado = "Inscrito"
                 infoCrearEst.idCamper = (uCamper.at(-1)?.idCamper ?? -1) + 1;
                 console.log(infoCrearEst.idCamper);
-
                 await collection.insertOne(infoCrearEst)
-                res.send('Camper ingresado correctamente')
+                res.status(201).send('camper ingresado correctamente')
             } else {
                 res.json("id o contraseña incorrectos")
             }
         } catch {
-            res.send("error en insertar usuario");
+            res.status(400).send("error en insertar camper, campos no validos");
+            res.status(500).send('error en el servidor al crear camper')
         }
     }
     await crearEstudiante()
 })
-//  curl -X POST http://localhost:6969/coordinador/0,xd/crearEstudiante   -H "Content-Type: application/json"   -d '{"contrasena":"1","nombre":"Juan","apellido":"Pérez","acudiente":"María Gómez","telefono":"3124567890"}'
-// ############################################################################################################################################################################################################################
-// ############################################################################################################################################################################################################################
+//  curl -X POST http://localhost:2512/coordinador/0/1234/crearEstudiante   -H "Content-Type: application/json"   -d '{"contrasena":"1234","nombre":"Juan","apellido":"Pérez","acudiente":"María Gómez","telefono":"3124567890"}'
 
-/////////////TRainers Crear
+//TRainers Crear
 
 app.post('/coordinador/:idCoordinador,:contrasena/crearTrainer', async (req, res) => {
     async function crearTrainer() {
@@ -141,43 +190,34 @@ app.post('/coordinador/:idCoordinador,:contrasena/crearTrainer', async (req, res
             let { collection } = await conectar("coordinador");
             let id = req.params.idCoordinador;
             console.log(id);
-
             let contraseña = String(req.params.contrasena)
             console.log(contraseña);
-
             let coordinador = await collection.findOne({ "idCoordinador": Number(id) })
             console.log(coordinador);
-
             console.log(coordinador);
             if (coordinador.contrasena == contraseña) {
                 let { collection } = await conectar("trainers")
                 let uTrainer = await collection.find().toArray()
                 console.log(uTrainer);
-
                 let infoCrearTra = req.body;
                 console.log(infoCrearTra);
                 infoCrearTra.idTrainer = (uTrainer.at(-1)?.idTrainer ?? -1) + 1;
                 console.log(infoCrearTra.idTrainers);
-
                 await collection.insertOne(infoCrearTra)
-                res.send('Trainer ingresado correctamente')
+                res.status(201).send('trainer ingresado correctamente')
             } else {
                 res.json("id o contraseña incorrectos")
             }
-
-
-
         } catch {
-            res.send("error en insertar usuario");
+            res.status(400).send("error en insertar trainer, campos no validos");
+            res.status(500).send('error en el servidor al crear trainer')
         }
     }
     await crearTrainer()
 })
 
-//  curl -X POST http://localhost:6969/coordinador/0,xd/crearTrainer   -H "Content-Type: application/json"   -d '{"contrasena":"2","nombre":"Pedro","apellido":"Gomez","telefono":"3164372414","idHorario":1,"idGrupos":2}'
+//  curl -X POST http://localhost:2512/coordinador/0/1234/crearTrainer   -H "Content-Type: application/json"   -d '{"contrasena":"2","nombre":"Pedro","apellido":"Gomez","telefono":"3164372414","idHorario":1,"idGrupos":2}'
 
-// ############################################################################################################################################################################################################################
-// ############################################################################################################################################################################################################################
 // crear Horario 
 
 app.post('/coordinador/:idCoordinador,:contrasena/crearHorario', async (req, res) => {
@@ -186,45 +226,36 @@ app.post('/coordinador/:idCoordinador,:contrasena/crearHorario', async (req, res
             let { collection } = await conectar("coordinador");
             let id = req.params.idCoordinador;
             console.log(id);
-
             let contraseña = String(req.params.contrasena)
             console.log(contraseña);
-
             let coordinador = await collection.findOne({ "idCoordinador": Number(id) })
             console.log(coordinador);
-
             console.log(coordinador);
             if (coordinador.contrasena == contraseña) {
                 let { collection } = await conectar("horarios")
                 let uHorario = await collection.find().toArray()
                 console.log(uHorario);
-
                 let infoCrearHorario = req.body;
                 console.log(infoCrearHorario);
                 infoCrearHorario.idHorario = (uHorario.at(-1)?.idHorario ?? -1) + 1;
                 console.log(infoCrearHorario.idHorario);
-
                 await collection.insertOne(infoCrearHorario)
-                res.send('horario ingresado correctamente')
+                res.status(201).send('horario ingresado correctamente')
             } else {
                 res.json("id o contraseña incorrectos")
             }
         } catch {
-            res.send("error en insertar horario");
+            res.status(400).send("error en insertar horario, campos no validos");
+            res.status(500).send('error en el servidor al crear horario')
         }
     }
     await crearHorario()
 })
 
-//  curl -X POST http://localhost:6969/coordinador/0,xd/crearHorario   -H "Content-Type: application/json"   -d '{"nombre":"jornada1","horas":"6am a 10am"}'
-//  curl -X POST http://localhost:6969/coordinador/0,xd/crearHorario   -H "Content-Type: application/json"   -d '{"nombre":"jornada2","horas":"10am a 2pm"}'
-//  curl -X POST http://localhost:6969/coordinador/0,xd/crearHorario   -H "Content-Type: application/json"   -d '{"nombre":"jornada3","horas":"2pm a 6pm"}'
-//  curl -X POST http://localhost:6969/coordinador/0,xd/crearHorario   -H "Content-Type: application/json"   -d '{"nombre":"jornada4","horas":"6pm a 10pm"}'
-
-
-// ############################################################################################################################################################################################################################
-// ############################################################################################################################################################################################################################
-
+//  curl -X POST http://localhost:2512/coordinador/0/1234/crearHorario   -H "Content-Type: application/json"   -d '{"nombre":"jornada1","horas":"6am a 10am"}'
+//  curl -X POST http://localhost:2512/coordinador/0/1234/crearHorario   -H "Content-Type: application/json"   -d '{"nombre":"jornada2","horas":"10am a 2pm"}'
+//  curl -X POST http://localhost:2512/coordinador/0/1234/crearHorario   -H "Content-Type: application/json"   -d '{"nombre":"jornada3","horas":"2pm a 6pm"}'
+//  curl -X POST http://localhost:2512/coordinador/0/1234/crearHorario   -H "Content-Type: application/json"   -d '{"nombre":"jornada4","horas":"6pm a 10pm"}'
 
 // crear rutas 
 
@@ -253,24 +284,22 @@ app.post('/coordinador/:idCoordinador,:contrasena/crearRuta', async (req, res) =
                 console.log(infoCrearRuta.idRuta);
 
                 await collection.insertOne(infoCrearRuta)
-                res.send('ruta ingresado correctamente')
+                res.status(201).send('ruta ingresada correctamente')
             } else {
                 res.json("id o contraseña incorrectos")
             }
         } catch {
-            res.send("error en insertar ruta");
+            res.status(400).send("error en insertar ruta, campos no validos");
+            res.status(500).send('error en el servidor al crear ruta')
         }
     }
     await crearRuta()
 })
 
 
-//  curl -X POST http://localhost:6969/coordinador/0,xd/crearRuta   -H "Content-Type: application/json"   -d '{"nombreRuta":"Nodejs","intro":"","python":"","html/css":"","scrum":"","git":"","Javascript":"","introBBD":"","mongoDB":"","MySQL":"","Express":""}'
-//  curl -X POST http://localhost:6969/coordinador/0,xd/crearRuta   -H "Content-Type: application/json"   -d '{"nombreRuta":"NetCore","intro":"","python":"","html/css":"","scrum":"","git":"","Javascript":"","introBBD":"","C##":"","postgreSQL":"","NetCore":""}'
-//  curl -X POST http://localhost:6969/coordinador/0,xd/crearRuta   -H "Content-Type: application/json"   -d '{"nombreRuta":"Java","intro":"","python":"","html/css":"","scrum":"","git":"","Javascript":"","introBBD":"","mongoDB":"","postgreSQL":"","SpringBoot":""}'
-
-// ############################################################################################################################################################################################################################
-// ############################################################################################################################################################################################################################
+//  curl -X POST http://localhost:2512/coordinador/0/1234/crearRuta   -H "Content-Type: application/json"   -d '{"nombreRuta":"Nodejs","intro":"","python":"","html/css":"","scrum":"","git":"","Javascript":"","introBBD":"","mongoDB":"","MySQL":"","Express":""}'
+//  curl -X POST http://localhost:2512/coordinador/0/1234/crearRuta   -H "Content-Type: application/json"   -d '{"nombreRuta":"NetCore","intro":"","python":"","html/css":"","scrum":"","git":"","Javascript":"","introBBD":"","C##":"","postgreSQL":"","NetCore":""}'
+//  curl -X POST http://localhost:2512/coordinador/0/1234/crearRuta   -H "Content-Type: application/json"   -d '{"nombreRuta":"Java","intro":"","python":"","html/css":"","scrum":"","git":"","Javascript":"","introBBD":"","mongoDB":"","postgreSQL":"","SpringBoot":""}'
 
 // crear salones
 
@@ -296,24 +325,22 @@ app.post('/coordinador/:idCoordinador/:contrasena/crearGrupos', async (req, res)
                 console.log(infoCrearGrupo.idGrupo);
 
                 await collection.insertOne(infoCrearGrupo)
-                res.send('grupo ingresado correctamente')
+                res.status(201).send(`grupo ingresado ${req.body.nombreRuta} correctamente`)
             } else {
                 res.json("id o contraseña incorrectos")
             }
         } catch {
-            res.send("error en insertar grupo");
+            res.status(400).send("error en insertar grupo, campos no validos");
+            res.status(500).send('error en el servidor al crear grupo')
         }
     }
     await crearGrupo()
 })
 
 
-//  curl -X POST http://localhost:6969/coordinador/0/xd/crearGrupos   -H "Content-Type: application/json"   -d '{"nombreGrupo":"S1"}'
+//  curl -X POST http://localhost:2512/coordinador/0/1234/crearGrupos   -H "Content-Type: application/json"   -d '{"nombreGrupo":"S1"}'
 
-
-// ############################################################################################################################################################################################################################
-// ############################################################################################################################################################################################################################
-
+// mostrar camper inscritos
 app.get('/coordinador/:idCoordinador/:contrasena/aprobarCamper', async (req, res) => {
     async function buscarCamper() {
 
@@ -327,26 +354,21 @@ app.get('/coordinador/:idCoordinador/:contrasena/aprobarCamper', async (req, res
             if (coordinador.contrasena == contraseña) {
                 let { collection } = await conectar("campers");
                 let camper = await collection.find({ estado: "Inscrito" }).toArray();
-                res.json(camper)
+                res.status(200).json(camper)
             } else {
-                res.json("id o contraseña incorrectos")
+                res.status(401).send("credenciales invalidas")
             }
         } catch {
-            res.send("error en aprobar camper");
+            res.status(500).send("error del servidor para obtener campers inscritos");
         }
     }
-
 
     await buscarCamper();
 });
 
-//curl http://localhost:6969/coordinador/0/xd/aprobarCamper
+//curl http://localhost:2512/coordinador/0/1234/aprobarCamper
 
-
-// ############################################################################################################################################################################################################################
-// ############################################################################################################################################################################################################################
-
-
+// aprobar camper
 app.put('/coordinador/:idCoordinador/:contrasena/aprobarCamper/:idCamper', async (req, res) => {
     async function crearGrupo() {
         try {
@@ -367,22 +389,20 @@ app.put('/coordinador/:idCoordinador/:contrasena/aprobarCamper/:idCamper', async
                     { "idCamper": Number(identificador) },
                     { $set: { "estado": "Aprobado" } }
                 )
-                res.json(`Camper ${identificador} aprobado`)
+                res.status(200).send(`Camper ${identificador} aprobado`)
             } else {
-                res.json("id o contraseña incorrectos")
+                res.status(401).send("credenciales invalidas")
             }
         } catch {
-            res.send("error en aprobar camper");
+            res.status(500).send("error del servidor para aprobar camper");
         }
     }
     await crearGrupo()
 })
 
-// curl -X PUT "http://localhost:6969/coordinador/0/xd/aprobarCamper/1"
+// curl -X PUT "http://localhost:2512/coordinador/0/1234/aprobarCamper/1"
 
-// ############################################################################################################################################################################################################################
-// ############################################################################################################################################################################################################################
-
+// asignar ruta a grupo
 
 app.put('/coordinador/:idCoordinador/:contrasena/asignarGrupoRuta/:idGrupo/:idRuta', async (req, res) => {
     async function crearGrupo() {
@@ -404,27 +424,20 @@ app.put('/coordinador/:idCoordinador/:contrasena/asignarGrupoRuta/:idGrupo/:idRu
                     { "idGrupo": Number(idGrupo) },
                     { $set: { "idRuta": Number(idRuta) } }
                 )
-                res.json(`ruta ${idRuta} asignada`)
+                res.status(200).json(`ruta ${idRuta} asignada`)
             } else {
-                res.json("id o contraseña incorrectos")
+                res.status(401).send("credenciales invalidas")
             }
         } catch {
-            res.send("ruta asignada");
+            res.status(500).send("error del servidor para asignar ruta");
         }
     }
     await crearGrupo()
 })
 
-// curl -X PUT http://localhost:6969/coordinador/0/xd/asignarGrupoRuta/2/1
+// curl -X PUT http://localhost:2512/coordinador/0/1234/asignarGrupoRuta/2/1
 
-
-// ############################################################################################################################################################################################################################
-// ############################################################################################################################################################################################################################
-
-// ############################################################################################################################################################################################################################
-// ############################################################################################################################################################################################################################
-
-
+// asignar horarios
 app.put('/coordinador/:idCoordinador/:contrasena/asignarGrupoHorario/:idGrupo/:idHorario', async (req, res) => {
     async function crearGrupo() {
         try {
@@ -445,26 +458,20 @@ app.put('/coordinador/:idCoordinador/:contrasena/asignarGrupoHorario/:idGrupo/:i
                     { "idGrupo": Number(idGrupo) },
                     { $set: { "idHorario": Number(idHorario) } }
                 )
-                res.json(`horario ${idHorario} asignada`)
+                res.status(200).json(`horario ${idHorario} asignada`)
             } else {
-                res.json("id o contraseña incorrectos")
+                res.status(401).send("credenciales invalidas")
             }
         } catch {
-            res.send("horario no asignada");
+            res.status(500).send("error del servidor para asignar horario");
         }
     }
     await crearGrupo()
 })
 
-// curl -X PUT http://localhost:6969/coordinador/0/xd/asignarGrupoHorario/3/3
+// curl -X PUT http://localhost:2512/coordinador/0/1234/asignarGrupoHorario/3/3
 
-
-// ############################################################################################################################################################################################################################
-// ############################################################################################################################################################################################################################
-// ############################################################################################################################################################################################################################
-// ############################################################################################################################################################################################################################
-
-
+// asignar trainer
 app.put('/coordinador/:idCoordinador/:contrasena/asignarGrupoTrainer/:idGrupo/:idTrainer', async (req, res) => {
     async function crearGrupo() {
         try {
@@ -485,29 +492,20 @@ app.put('/coordinador/:idCoordinador/:contrasena/asignarGrupoTrainer/:idGrupo/:i
                     { "idGrupo": Number(idGrupo) },
                     { $set: { "idTrainer": Number(idTrainer) } }
                 )
-                res.json(`trainer ${idTrainer} asignada`)
+                res.status(200).json(`trainer ${idTrainer} asignada`)
             } else {
-                res.json("id o contraseña incorrectos")
+                res.status(401).send("credenciales invalidas")
             }
         } catch {
-            res.send("trainer no asignada");
+            res.status(500).send("error del servidor para asignar trainer");
         }
     }
     await crearGrupo()
 })
 
-// curl -X PUT http://localhost:6969/coordinador/0/xd/asignarGrupoTrainer/3/5
+// curl -X PUT http://localhost:2512/coordinador/0/1234/asignarGrupoTrainer/3/5
 
-
-// ############################################################################################################################################################################################################################
-// ############################################################################################################################################################################################################################
-
-
-
-// ############################################################################################################################################################################################################################
-// ############################################################################################################################################################################################################################
-
-
+// asignar campers
 app.put('/coordinador/:idCoordinador/:contrasena/asignarGrupoCamper/:idGrupo/:idCamper', async (req, res) => {
     async function crearGrupo() {
         try {
@@ -530,56 +528,23 @@ app.put('/coordinador/:idCoordinador/:contrasena/asignarGrupoCamper/:idGrupo/:id
                     { "idCamper": Number(idCamper) },
                     { $addToSet: { "campers": Number(idCamper) } }
                 )
-    
-                res.json(`camper ${idCamper} asignado`)
+
+                res.status(200).json(`camper ${idCamper} asignado`)
             } else {
-                res.json("id o contraseña incorrectos")
+                res.status(401).send("credenciales invalidas")
             }
         } catch {
-            res.send("no se pudo asignar el camper ");
+            res.status(500).send("error del servidor para asignar camper");
         }
     }
     await crearGrupo()
 })
 
-// curl -X PUT http://localhost:6969/coordinador/0/xd/asignarGrupoCamper/1/1
+// curl -X PUT http://localhost:2512/coordinador/0/1234/asignarGrupoCamper/1/1
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ############################################################################################################################################################################################################################
-// ############################################################################################################################################################################################################################
+// Campers
 // endpoint para obtener la informacion de un camper por id, autenticando la contraseña
-app.get('/campers/:idCamper,:contrasena/verMiInfo', async (req, res) => {
+app.get('/campers/:idCamper/:contrasena/verMiInfo', async (req, res) => {
     async function buscarCamper() {
         try {
             let { collection } = await conectar("campers");
@@ -588,19 +553,14 @@ app.get('/campers/:idCamper,:contrasena/verMiInfo', async (req, res) => {
             let camper = await collection.findOne({ "idCamper": Number(id) })
             console.log(camper);
             if (camper.contrasena == contraseña) {
-                res.json({
-                    "idCamper": camper.idCamper,
-                    "nombre": camper.nombre,
-                    "apellido": camper.apellido,
-                    "acudiente": camper.acudiente,
-                    "telefono": camper.telefono,
-                    "estado": camper.estado
+                res.status(200).json({
+                    camper
                 })
             } else {
-                res.json("id o contraseña incorrectos")
+                res.status(401).send("credenciales invalidas")
             }
         } catch (e) {
-            console.log(e, 'error en crear colecciones')
+            res.status(500).send("error del servidor para ver informacionde camper");
         }
     }
     await buscarCamper();
@@ -610,83 +570,11 @@ app.get('/campers/:idCamper,:contrasena/verMiInfo', async (req, res) => {
 
 
 
-// curl http://localhost:6969/campers/0,1/verMiInfo
+// curl http://localhost:2512/campers/0/1234/verMiInfo
 
-app.get('/campers/:idCamper,:contrasena/academico', async (req, res) => {
-    async function mirarInfoAcademica() {
-        try {
-            let { collection } = await conectar("campers");
-            let id = req.params.idCamper;
-            let contraseña = String(req.params.contrasena)
-            let camper = await collection.findOne({ "idCamper": Number(id) })
-            console.log(camper);
-            if (camper.contrasena == contraseña) {
-                res.json({
-                    "idCamper": camper.idCamper,
-                    "nombre": camper.nombre,
-                    "apellido": camper.apellido,
-                    "acudiente": camper.acudiente,
-                    "telefono": camper.telefono,
-                    "estado": camper.estado
-                })
-            } else {
-                res.json("id o contraseña incorrectos")
-            }
-        } catch (e) {
-            console.log(e, 'error en crear colecciones')
-        }
-    }
-    await mirarInfoAcademica();
-}
-);
-///juan 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ############################################################################################################################################################################################################################
-// ############################################################################################################################################################################################################################
-
-
-
-
+// trainers
 //// Trainer verInfo
-app.get('/trainers/:idTrainer,:contrasena/verMiInfo', async (req, res) => {
+app.get('/trainers/:idTrainer/:contrasena/verMiInfo', async (req, res) => {
     async function buscarTrainer() {
         try {
             let { collection } = await conectar("trainers");
@@ -695,31 +583,21 @@ app.get('/trainers/:idTrainer,:contrasena/verMiInfo', async (req, res) => {
             let trainer = await collection.findOne({ "idTrainer": Number(id) })
             console.log(trainer);
             if (trainer.contrasena == contraseña) {
-                res.json({
-                    "idTrainer": trainer.idTrainer,
-                    "nombre": trainer.nombre,
-                    "apellido": trainer.apellido,
-                    "telefono": trainer.telefono,
-                    "horario": trainer.idHorarios,
-                    "grupos": trainer.idGrupos,
+                res.status(200).json({
+                    trainer
                 })
             } else {
-                res.json("id o contraseña incorrectos")
+                res.status(401).send("credenciales invalidas")
             }
         } catch (e) {
-            console.log(e, 'error en crear colecciones')
+            res.status(500).send("error del servidor para ver informacion de trainer");
         }
     }
     await buscarTrainer();
 }
 );
 
-// curl http://localhost:6969/trainers/0,2/verMiInfo
-// ############################################################################################################################################################################################################################
-// ############################################################################################################################################################################################################################
-
-
-
+// curl http://localhost:2512/trainers/0/1234/verMiInfo
 
 
 
@@ -729,36 +607,5 @@ app.listen(PORT, () => {
     console.log("server iniciadoo");
 }
 );
-//  curl -X POST http://localhost:6969/crearCoordinador   -H "Content-Type: application/json"   -d '{"contrasena":"xd","nombre":"juan","apellido":"perez"}'
 
 
-app.get('/coordinador/:idCoordinador,:contrasena/verMiInfo', async (req, res) => {
-    async function buscarCoordinador() {
-        try {
-            let { collection } = await conectar("coordinador");
-            let id = req.params.idCoordinador;
-            let contraseña = String(req.params.contrasena)
-            let coordinador = await collection.findOne({ "idCoordinador": Number(id) })
-            console.log(coordinador);
-            if (coordinador.contrasena == contraseña) {
-                res.json({
-                    "idCoordinador": coordinador.idCoordinador,
-                    "nombre": coordinador.nombre,
-                    "apellido": coordinador.apellido
-                })
-            } else {
-                res.json("id o contraseña incorrectos")
-            }
-        } catch (e) {
-            console.log(e, 'error al iniciar sesion')
-        }
-    }
-    await buscarCoordinador();
-}
-);
-
-
-// curl http://localhost:6969/coordinador/0,xd/verMiInfo
-
-// ############################################################################################################################################################################################################################
-// ############################################################################################################################################################################################################################ 
