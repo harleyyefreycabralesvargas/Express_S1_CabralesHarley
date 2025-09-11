@@ -15,7 +15,7 @@
       "get": {
         "description": "",
         "responses": {
-          "201": {
+          "201                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  ": {
             "description": "Created"
           },
           "409": {
@@ -90,14 +90,14 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
-          },
           "201": {
             "description": "Created"
           },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
           },
           "500": {
             "description": "Internal Server Error"
@@ -105,12 +105,18 @@
         }
       }
     },
-    "/coordinador/{idCoordinador,:contrasena}/crearTrainer": {
+    "/coordinador/{idCoordinador}/{contrasena}/crearTrainer": {
       "post": {
         "description": "",
         "parameters": [
           {
-            "name": "idCoordinador,:contrasena",
+            "name": "idCoordinador",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "contrasena",
             "in": "path",
             "required": true,
             "type": "string"
@@ -147,12 +153,18 @@
         }
       }
     },
-    "/coordinador/{idCoordinador,:contrasena}/crearHorario": {
+    "/coordinador/{idCoordinador}/{contrasena}/crearHorario": {
       "post": {
         "description": "",
         "parameters": [
           {
-            "name": "idCoordinador,:contrasena",
+            "name": "idCoordinador",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "contrasena",
             "in": "path",
             "required": true,
             "type": "string"
@@ -186,12 +198,18 @@
         }
       }
     },
-    "/coordinador/{idCoordinador,:contrasena}/crearRuta": {
+    "/coordinador/{idCoordinador}/{contrasena}/crearRuta": {
       "post": {
         "description": "",
         "parameters": [
           {
-            "name": "idCoordinador,:contrasena",
+            "name": "idCoordinador",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "contrasena",
             "in": "path",
             "required": true,
             "type": "string"

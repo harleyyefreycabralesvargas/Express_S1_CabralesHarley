@@ -119,7 +119,7 @@ app.post('/coordinador/:idCoordinador/:contrasena/crearEstudiante', async (req, 
 })
 //  curl -X POST http://localhost:2512/coordinador/0/1234/crearEstudiante   -H "Content-Type: application/json"   -d '{"contrasena":"1234","nombre":"Juan","apellido":"Pérez","acudiente":"María Gómez","telefono":"3124567890"}'
  
-//TRainers Crear
+//Trainers Crear 
 
 app.post('/coordinador/:idCoordinador/:contrasena/crearTrainer', async (req, res) => {
     async function crearTrainer() {
