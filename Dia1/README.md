@@ -4,7 +4,7 @@ API hecha en **Express.js** y **MongoDB** para gestionar **campers, coordinadore
 
 ---
 
-##  Instalación
+#  Instalación
 
 entremos a nuestros archivos dentro de una carpeta donde se quiera descargar el proyecto y la abrimos en terminal para ejecutar lossiguientes comandos
 ```bash
@@ -26,37 +26,56 @@ npm run inicio
 esto descargara los paquetes que se utilizan en el programa y ejecutara nuestro servidor local
 
 
-La API se ejecuta en:
+### La API se ejecuta en:
  http://localhost:2512
 
-Documentación Swagger:
+### Documentación Swagger:
 http://localhost:2512/doc
 
-## Endpoints principales
+# Endpoints principales
 # 1. Gestión de base de datos
-### http://localhost:2512/crearColecciones : Crea las colecciones del proyecto
-
-* 201: creadas con éxito
-
-* 409: ya existen
-
-* 500: error del servidor
+### http://localhost:2512/crearColecciones 
+## crea las colecciones del proyecto
 
 # 2. Coordinadores
 ### curl -X POST http://localhost:2512/crearCoordinador -H "Content-Type: application/json" -d '{"contrasena":"1234","nombre":"Juan","apellido":"Pérez"}'
 
-crea un coordinador
+## crea un coordinador
+
+### curl -X POST http://localhost:2512/coordinador/0/1234/crearHorario   -H "Content-Type: application/json"   -d '{"nombre":"jornada1","horas":"6am a 10am"}'
+
+## crear un horario 
+
+### curl -X POST http://localhost:2512/coordinador/0/1234/crearRuta   -H "Content-Type: application/json"   -d '{"nombreRuta":"Nodejs","intro":"","python":"","html/css":"","scrum":"","git":"","Javascript":"","introBBD":"","mongoDB":"","MySQL":"","Express":""}'
+
+## crear una ruta
+
+### curl -X POST http://localhost:2512/coordinador/0/1234/crearGrupos   -H "Content-Type: application/json"   -d '{"nombreGrupo":"S1"}'
+
+## crea grupo
+
+### curl -X PUT http://localhost:2512/coordinador/0/1234/asignarGrupoRuta/0/0
+## asignar ruta a grupo
+
+### curl -X PUT http://localhost:2512/coordinador/0/1234/asignarGrupoHorario/0/0
+## asignar horario a grupo
+
+### curl -X PUT http://localhost:2512/coordinador/0/1234/asignarGrupoTrainer/0/0
+## asignar trainer a grupo
+
+### curl -X PUT http://localhost:2512/coordinador/0/1234/asignarGrupoCamper/0/0
+## asignar camper a grupo
 
 # 3. Campers
 ### curl -X POST http://localhost:2512/coordinador/0/1234/crearEstudiante   -H "Content-Type: application/json"   -d '{"contrasena":"1234","nombre":"Juan","apellido":"Pérez","acudiente":"María Gómez","telefono":"3124567890"}'
 
 ## crea un camper 
 
-### http://localhost:2512/coordinador/0/1234/aprobarCamper
+### curl http://localhost:2512/coordinador/0/1234/aprobarCamper
 
 ## lista campers en estado Inscrito
 
-### curl -X PUT "http://localhost:2512/coordinador/0/1234/aprobarCamper/1"
+### curl -X PUT "http://localhost:2512/coordinador/0/1234/aprobarCamper/0"
 
 ## aprueba un camper 
 
@@ -64,37 +83,15 @@ crea un coordinador
 ## ver información personal del camper
 
 # 4. Trainers
-POST /coordinador/:idCoordinador/:contrasena/crearTrainer
+### curl -X POST http://localhost:2512/coordinador/0/1234/crearTrainer   -H "Content-Type: application/json"   -d '{"contrasena":"2","nombre":"Pedro","apellido":"Gomez","telefono":"3164372414","idHorario":1,"idGrupos":2}'
+
 ## crear un trainer
 
-GET /trainers/:idTrainer/:contrasena/verMiInfo
-Ver información personal del trainer
+### curl http://localhost:2512/trainers/0/2/verMiInfo
+## ver información personal del trainer
 
-Horarios
-POST /coordinador/:idCoordinador/:contrasena/crearHorario
-Crear un horario 
 
-Rutas
-POST /coordinador/:idCoordinador/:contrasena/crearRuta
-Crear una ruta
-
-Grupos
-POST /coordinador/:idCoordinador/:contrasena/crearGrupos
-Crear grupo
-
-PUT /coordinador/:idCoordinador/:contrasena/asignarGrupoRuta/:idGrupo/:idRuta
-Asignar ruta a grupo
-
-PUT /coordinador/:idCoordinador/:contrasena/asignarGrupoHorario/:idGrupo/:idHorario
-Asignar horario a grupo
-
-PUT /coordinador/:idCoordinador/:contrasena/asignarGrupoTrainer/:idGrupo/:idTrainer
-Asignar trainer a grupo
-
-PUT /coordinador/:idCoordinador/:contrasena/asignarGrupoCamper/:idGrupo/:idCamper
-Asignar camper a grupo
-
-## Códigos de estado comunes
+# Códigos de estado comunes
 200 OK → Petición exitosa.
 
 201 Created → Recurso creado.

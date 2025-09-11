@@ -31,7 +31,6 @@ async function crearColecciones() {
     await db.createCollection("campers")
     await db.createCollection("trainers")
     await db.createCollection("coordinador")
-    await db.createCollection("salones")
     await db.createCollection("horarios")
     await db.createCollection("rutas")
     await db.createCollection("grupos")
@@ -72,7 +71,7 @@ app.post('/crearCoordinador', async (req, res) => {
             console.log(infoCrearCoordinador.idCoordinador);
 
             await collection.insertOne(infoCrearCoordinador)
-            res.status(201).send('coordiandor ingresado correctamente')
+            res.status(201).send(`coordiandor ingresado correctamente id ${infoCrearCoordinador.idCoordinador}`)
         } catch {
             res.status(400).send("error en insertar cordinador, campos no validos");
             res.status(500).send('error en el servidor al crear coordinador')
@@ -103,7 +102,7 @@ app.post('/coordinador/:idCoordinador/:contrasena/crearEstudiante', async (req, 
                 infoCrearEst.idCamper = (uCamper.at(-1)?.idCamper ?? -1) + 1;
                 console.log(infoCrearEst.idCamper);
                 await collection.insertOne(infoCrearEst)
-                res.status(201).send('camper ingresado correctamente')
+                res.status(201).send(`camper ingresado correctamente id ${infoCrearEst.idCamper}`)
             } else {
                 res.status(401).json("id o contraseña incorrectos")
             }
@@ -141,7 +140,7 @@ app.post('/coordinador/:idCoordinador/:contrasena/crearTrainer', async (req, res
                 infoCrearTra.idTrainer = (uTrainer.at(-1)?.idTrainer ?? -1) + 1;
                 console.log(infoCrearTra.idTrainers);
                 await collection.insertOne(infoCrearTra)
-                res.status(201).send('trainer ingresado correctamente')
+                res.status(201).send(`trainer ingresado correctamente id ${infoCrearTra.idTrainer}`)
             } else {
                 res.json("id o contraseña incorrectos")
             }
@@ -160,7 +159,7 @@ app.post('/coordinador/:idCoordinador/:contrasena/crearTrainer', async (req, res
 
 // crear Horario 
 
-app.post('/coordinador/:idCoordinador,:contrasena/crearHorario', async (req, res) => {
+app.post('/coordinador/:idCoordinador/:contrasena/crearHorario', async (req, res) => {
     async function crearHorario() {
         try {
             let { collection } = await conectar("coordinador");
@@ -202,30 +201,25 @@ app.post('/coordinador/:idCoordinador,:contrasena/crearHorario', async (req, res
 
 // crear rutas 
 
-app.post('/coordinador/:idCoordinador,:contrasena/crearRuta', async (req, res) => {
+app.post('/coordinador/:idCoordinador/:contrasena/crearRuta', async (req, res) => {
     async function crearRuta() {
         try {
             let { collection } = await conectar("coordinador");
             let id = req.params.idCoordinador;
             console.log(id);
-
             let contraseña = String(req.params.contrasena)
             console.log(contraseña);
-
             let coordinador = await collection.findOne({ "idCoordinador": Number(id) })
             console.log(coordinador);
-
             console.log(coordinador);
             if (coordinador.contrasena == contraseña) {
                 let { collection } = await conectar("rutas")
                 let uRuta = await collection.find().toArray()
                 console.log(uRuta);
-
                 let infoCrearRuta = req.body;
                 console.log(infoCrearRuta);
                 infoCrearRuta.idRuta = (uRuta.at(-1)?.idRuta ?? -1) + 1;
                 console.log(infoCrearRuta.idRuta);
-
                 await collection.insertOne(infoCrearRuta)
                 res.status(201).send('ruta ingresada correctamente')
             } else {
@@ -271,7 +265,7 @@ app.post('/coordinador/:idCoordinador/:contrasena/crearGrupos', async (req, res)
                 console.log(infoCrearGrupo.idGrupo);
 
                 await collection.insertOne(infoCrearGrupo)
-                res.status(201).send(`grupo ingresado ${req.body.nombreRuta} correctamente`)
+                res.status(201).send(`grupo ${req.body.nombreGrupo} ingresado correctamente`)
             } else {
                 res.json("id o contraseña incorrectos")
             }
@@ -407,7 +401,7 @@ app.put('/coordinador/:idCoordinador/:contrasena/asignarGrupoHorario/:idGrupo/:i
                     { "idGrupo": Number(idGrupo) },
                     { $set: { "idHorario": Number(idHorario) } }
                 )
-                res.status(200).json(`horario ${idHorario} asignada`)
+                res.status(200).json(`horario ${idHorario} asignado`)
             } else {
                 res.status(401).send("credenciales invalidas")
             }
@@ -436,12 +430,11 @@ app.put('/coordinador/:idCoordinador/:contrasena/asignarGrupoTrainer/:idGrupo/:i
                 let { collection: gruposCollection } = await conectar("grupos");
                 let { collection: trainerCollection } = await conectar("trainers");
                 console.log(await collection.findOne())
-
                 await gruposCollection.updateOne(
                     { "idGrupo": Number(idGrupo) },
                     { $set: { "idTrainer": Number(idTrainer) } }
                 )
-                res.status(200).json(`trainer ${idTrainer} asignada`)
+                res.status(200).json(`trainer ${idTrainer} asignado`)
             } else {
                 res.status(401).send("credenciales invalidas")
             }
