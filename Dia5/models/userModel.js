@@ -5,12 +5,6 @@ const UserSchema = new mongoose.Schema({
     email:{type:String,required:true,unique:true,lowercase:true,trim:true},
     age:{type:Number,min:0}
 },{timestamps:true});
-
-/*
--- Clase de dominio --
-*/
-
-
 class UserClass{
     get isAdult(){
         return (this.age ?? 0) >=18;

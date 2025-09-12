@@ -1,6 +1,5 @@
 import {Router} from "express";
 
-//La famosa vista...
 export function buildUserRouter(UserController){
     const router = Router();
     router.get("/",UserController.list);
