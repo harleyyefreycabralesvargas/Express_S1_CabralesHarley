@@ -1,6 +1,10 @@
 import "dotenv/config";
 import express from "express";
 
+import swaggerUI from 'swagger-ui-express'
+import swaggerDocumentation from './swagger.json'  with { type: 'json' };
+
+
 import { Database } from "./config/db.js";
 
 import { UserModel } from "./models/userModel.js";
@@ -18,6 +22,7 @@ class App {
     async init() {
         await this.db.connect();
         this.app.use(express.json());
+        this.app.use('/doc',swaggerUI.serve,swaggerUI.setup(swaggerDocumentation))
         this.app.get("/", (req, res) => {
             res.json({
                 ok: true,
