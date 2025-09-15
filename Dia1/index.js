@@ -34,7 +34,7 @@ async function crearColecciones() {
     await db.createCollection("horarios")
     await db.createCollection("rutas")
     await db.createCollection("grupos")
-}
+} 
 // Funcion para desconectar mongo db
 async function desconectarDb() {
     await client.close()
@@ -549,5 +549,4 @@ app.listen(PORT, () => {
     console.log("server iniciadoo");
 }
 );
-
 

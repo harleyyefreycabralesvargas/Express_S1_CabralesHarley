@@ -39,4 +39,39 @@ class App {
     }
 }
 const app = new App();
-app.init();
+app.init(); 
+
+// endpoints del crud de usuarios
+
+// crear un usuario 
+// curl -X POST http://localhost:3000/api/users \
+// -H "Content-Type: application/json" \
+// -d '{
+//   "name": "miguel",
+//   "email": "miguel@gmail.com",
+//   "age": 17
+// }'
+
+// listar todos los usuarios 
+// curl -X GET http://localhost:3000/api/users
+
+// obtener un usuario por id
+// curl -X GET http://localhost:3000/api/users/:id_del_usuario
+
+// actualizar un usuario por id
+// curl -X PUT http://localhost:3000/api/users/68c7a33df26a7ec3bc3690a6 -H "Content-Type: application/json" -d '{
+//   "name": "Miguel actualizado",
+//   "email": "newMiguel@gmail.com",
+//   "age": 18
+// }'
+
+// eliminar un usuario por id
+// curl -X DELETE http://localhost:3000/api/users/:id_del_usuario
+
+// ver Swagger
+
+// en navegador para ver el swagger:
+// http://localhost:3000/doc
+
+
+// curl -X PUT http://localhost:3000/api/users/:id_del_usuario -H "Content-Type: application/json" -d '{   "name": "Miguel actualizado",   "email": "newMiguel@gmail.com",   "age": 18 }'  

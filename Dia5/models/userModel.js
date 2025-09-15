@@ -6,6 +6,11 @@ const UserSchema = new mongoose.Schema({
     age:{type:Number,min:0}
 },{timestamps:true});
 class UserClass{
+    constructor(name,email,age){
+        this.name=name,
+        this.email=email,
+        this.age=age
+    }
     get isAdult(){
         return (this.age ?? 0) >=18;
     }
