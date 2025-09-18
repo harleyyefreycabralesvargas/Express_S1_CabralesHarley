@@ -1,25 +1,20 @@
 import passport from "passport";
 
 export const login = (req, res, next) => {
-  passport.authenticate("coordinador-local", (err, user, info) => {
+  passport.authenticate("local", (err, user, info) => {
     if (err) return next(err);
-    if (!user) return res.status(401).json({ message: info.message });
+    if (!user) return res.status(401).json({ msg: info.message });
 
     req.logIn(user, (err) => {
       if (err) return next(err);
-      return res.status(200).json({
-        message: "Login exitoso",
-        user: { id: user._id, nombre: user.nombre, rol: user.rol }
-      });
+      return res.json({ msg: "Sesión iniciada", rol: user.rol, usuario: user.nombre });
     });
   })(req, res, next);
 };
 
 export const logout = (req, res) => {
-  req.logout((err) => {
-    if (err) return res.status(500).send("Error al cerrar sesión");
-    res.clearCookie("connect.sid");
-    res.status(200).send("Sesión cerrada correctamente");
+  req.logout(() => {
+    res.json({ msg: "Sesión cerrada" });
   });
 };
 

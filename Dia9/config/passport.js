@@ -1,40 +1,57 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
-import { conectar } from "./db.js";
 import bcrypt from "bcrypt";
-import { ObjectId } from "mongodb";
+import {conectar,desconectarDb} from "./db.js";
 
-// Estrategia de login para coordinadores
-passport.use("coordinador-local", new LocalStrategy({
-  usernameField: "nombre",
-  passwordField: "contrasena"
-}, async (nombre, contrasena, done) => {
-  try {
-    const coordinadores = await conectar("coordinador");
-    const user = await coordinadores.findOne({ nombre });
+passport.use(new LocalStrategy(
+  { usernameField: "nombre", passwordField: "contrasena" },
+  async (nombre, contrasena, done) => {
+    try {
+      // Revisar en todas las colecciones de usuarios
+      const roles = ["coordinador", "trainer", "camper"];
 
-    if (!user) return done(null, false, { message: "Usuario no encontrado" });
+      let user = null;
+      let rol = null;
 
-    const match = await bcrypt.compare(contrasena, user.contrasena);
-    if (!match) return done(null, false, { message: "Contraseña incorrecta" });
+      for (const r of roles) {
+        const db = await conectar(r);
+        const encontrado = await db.findOne({ nombre });
+        if (encontrado) {
+          user = encontrado;
+          rol = r;
+          break;
+        }
+      }
 
-    return done(null, user);
-  } catch (err) {
-    return done(err);
+      if (!user) return done(null, false, { message: "Usuario no encontrado" });
+
+      // Validar contraseña
+      const esValido = await bcrypt.compare(contrasena, user.contrasena);
+      if (!esValido) return done(null, false, { message: "Contraseña incorrecta" });
+
+      user.rol = rol; // Guardamos el rol
+      return done(null, user);
+
+    } catch (err) {
+      return done(err);
+    }
   }
-}));
+));
 
-// Guardar en la sesión SOLO el id del usuario
+// Serializar usuario en sesión
 passport.serializeUser((user, done) => {
-  done(null, user._id.toString()); // guardar como string
+  done(null, { id: user._id, rol: user.rol });
 });
 
-passport.deserializeUser(async (id, done) => {
+// Deserializar al hacer peticiones
+passport.deserializeUser(async (obj, done) => {
   try {
-    const coordinadores = await conectar("coordinador");
-    const user = await coordinadores.findOne({ _id: new ObjectId(id) }); // convertir a ObjectId
-    done(null, user);
+    const db = await conectar(obj.rol);
+    const user = await db.findOne({ _id: obj.id });
+    done(null, { ...user, rol: obj.rol });
   } catch (err) {
     done(err);
   }
 });
+
+export default passport;
